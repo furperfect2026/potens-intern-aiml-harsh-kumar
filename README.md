@@ -6,7 +6,7 @@ Instead of just hooking up an LLM to a basic prompt, I focused on building a sys
 
 ---
 
-## 🏃‍♂️ How to Run
+## How to Run
 
 1. `pip install -r requirements.txt`
 2. Get a free Groq API key (console.groq.com) and add it to `.env`:
@@ -24,7 +24,7 @@ Instead of just hooking up an LLM to a basic prompt, I focused on building a sys
 
 ---
 
-## 🏗️ How I Approached This
+## How I Approached This
 
 ### 1. Making the tools actually matter
 I noticed a lot of LLMs can just guess the category from keywords (e.g., seeing the word "credit card" and guessing "billing"). I wanted to prove my tools were actually doing the work. 
@@ -42,7 +42,7 @@ For finding similar past tickets, I used scikit-learn's TF-IDF. Vector embedding
 
 ---
 
-## 📊 Honest Evaluation Numbers
+## Honest Evaluation Numbers
 
 I ran 10 test cases through the agent, including a few adversarial ones to try and break it. 
 
@@ -61,7 +61,7 @@ In **Example 8** ("I see charges I didn't make and my data may be exposed"), the
 
 ---
 
-## ✂️ What I'd Change For Production
+## What I'd Change For Production
 
 If I were actually shipping this to a Potens customer environment in 90 days, I'd upgrade a few things:
 1. **Swap TF-IDF for Real Embeddings**: Once the knowledge base grows, TF-IDF will struggle with synonyms. I'd move to a lightweight vector DB with `text-embedding-3-small`.
@@ -70,7 +70,7 @@ If I were actually shipping this to a Potens customer environment in 90 days, I'
 
 ---
 
-## 🤖 AI Use Log
+## AI Use Log
 
 As requested, here is my honest log of how I used AI to help build this over the last 24 hours:
 
