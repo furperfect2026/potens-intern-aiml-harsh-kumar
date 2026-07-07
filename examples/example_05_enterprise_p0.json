@@ -1,0 +1,121 @@
+{
+  "id": "example_05_enterprise_p0",
+  "description": "Enterprise customer urgent outage",
+  "input": {
+    "text": "The entire Potens API is returning 502 Bad Gateway for all our production services. We are completely blocked.",
+    "customer_tier": "enterprise",
+    "product_area": "api"
+  },
+  "agent_output": {
+    "category": "technical",
+    "priority": "P0",
+    "next_action": "route_to_engineering",
+    "confidence": 0.9,
+    "reasoning": [
+      {
+        "step": 1,
+        "action": "call_tool",
+        "detail": "Calling lookup_policy",
+        "tool_name": "lookup_policy",
+        "tool_input": {
+          "category": "technical",
+          "issue_keywords": [
+            "502 Bad Gateway",
+            "API",
+            "production services"
+          ]
+        },
+        "tool_output": null
+      },
+      {
+        "step": 2,
+        "action": "observe",
+        "detail": "lookup_policy returned status=ok",
+        "tool_name": "lookup_policy",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "policies": [
+            {
+              "id": "POL-005",
+              "title": "Potens API Downtime Policy",
+              "content": "Any Potens API downtime exceeding 5 minutes must be posted to the public status page. Affected customers with webhook integrations must receive a direct notification. Post-incident review is mandatory within 48 hours.",
+              "escalation_rule": "Notify infrastructure team immediately. Escalate to CTO if downtime exceeds 30 minutes.",
+              "sla_hours": 0.08
+            }
+          ]
+        }
+      },
+      {
+        "step": 3,
+        "action": "call_tool",
+        "detail": "Calling search_similar_tickets",
+        "tool_name": "search_similar_tickets",
+        "tool_input": {
+          "description": "Entire Potens API returning 502 Bad Gateway for all production services",
+          "top_k": 3
+        },
+        "tool_output": null
+      },
+      {
+        "step": 4,
+        "action": "observe",
+        "detail": "search_similar_tickets returned status=ok",
+        "tool_name": "search_similar_tickets",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "tickets": [
+            {
+              "id": "TKT-1006",
+              "description": "Our Potens API integration is returning 503 errors intermittently. It happens about 30% of the time. We're using the v2 REST API with the /analytics endpoint. This is affecting our production pipeline",
+              "category": "technical",
+              "priority": "P0",
+              "resolution": "The /analytics endpoint was hitting a rate limit on the upstream data provider. Increased the rate limit for enterprise-tier API keys and added better error messages. Customer's pipeline stabilized within 1 hour of the fix.",
+              "similarity_score": 0.28
+            }
+          ]
+        }
+      },
+      {
+        "step": 5,
+        "action": "call_tool",
+        "detail": "Calling draft_acknowledgment",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": {
+          "category": "technical",
+          "priority": "P0",
+          "summary": "Entire Potens API is down with 502 Bad Gateway error for all production services"
+        },
+        "tool_output": null
+      },
+      {
+        "step": 6,
+        "action": "observe",
+        "detail": "draft_acknowledgment returned status=ok",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "draft": "Hello,\n\nThank you for reaching out. We've received your support request regarding: Entire Potens API is down with 502 Bad Gateway error for all production services\n\nWe recognize this is a critical issue and have flagged it for immediate attention.\n\nYour ticket has been routed to our engineering team. You can expect an initial response within 15 minutes.\n\nIf you have any additional details that might help us resolve this faster, please reply to this message.\n\nBest regards,\nSupport Team",
+          "metadata": {
+            "sla_commitment": "15 minutes",
+            "assigned_team": "engineering team",
+            "priority_level": "P0"
+          }
+        }
+      },
+      {
+        "step": 7,
+        "action": "think",
+        "detail": "Final decision output generated.",
+        "tool_name": null,
+        "tool_input": null,
+        "tool_output": null
+      }
+    ],
+    "why": "The ticket clearly states that the entire Potens API is returning a 502 Bad Gateway error for all production services, which indicates a critical technical issue affecting multiple users and potentially impacting revenue. The lookup_policy function returned a relevant policy (POL-005) that outlines the procedures for handling API downtime, including notification and escalation rules. The search_similar_tickets function returned a similar ticket (TKT-1006) that, although not an exact match, suggests that API issues can have significant impacts on customers' production pipelines. Given the customer's enterprise tier and the severity of the issue, the priority is clearly P0. The draft_acknowledgment function generated a suitable response that acknowledges the critical nature of the issue and informs the customer that the ticket has been routed to the engineering team for immediate attention.",
+    "draft_response": null,
+    "needs_human_review": false
+  }
+}

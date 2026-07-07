@@ -1,0 +1,135 @@
+{
+  "id": "example_01_billing",
+  "description": "Clear billing issue (happy path)",
+  "input": {
+    "text": "My credit card was charged twice for this month's Potens subscription. I need a refund for the duplicate $99 charge.",
+    "customer_tier": "pro",
+    "product_area": "billing"
+  },
+  "agent_output": {
+    "category": "billing",
+    "priority": "P1",
+    "next_action": "route_to_billing_team",
+    "confidence": 0.9,
+    "reasoning": [
+      {
+        "step": 1,
+        "action": "call_tool",
+        "detail": "Calling lookup_policy",
+        "tool_name": "lookup_policy",
+        "tool_input": {
+          "category": "billing",
+          "issue_keywords": [
+            "refund",
+            "duplicate charge"
+          ]
+        },
+        "tool_output": null
+      },
+      {
+        "step": 2,
+        "action": "observe",
+        "detail": "lookup_policy returned status=ok",
+        "tool_name": "lookup_policy",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "policies": [
+            {
+              "id": "POL-001",
+              "title": "Potens Billing Dispute Resolution",
+              "content": "All billing disputes must be acknowledged within 4 business hours. Refund requests under $100 can be auto-approved. Refund requests over $100 require manager approval. Potens Enterprise customers receive priority handling with a 2-hour SLA.",
+              "escalation_rule": "Escalate to billing team lead if the disputed amount exceeds $500 or involves recurring charges.",
+              "sla_hours": 4
+            },
+            {
+              "id": "POL-002",
+              "title": "Potens Subscription Cancellation",
+              "content": "Subscription cancellations take effect at the end of the current billing cycle. Pro-rated refunds are available for annual plans within the first 30 days. Customers on Potens Enterprise plans must route cancellation through their account manager.",
+              "escalation_rule": "Route to account manager for enterprise-tier cancellations.",
+              "sla_hours": 8
+            }
+          ]
+        }
+      },
+      {
+        "step": 3,
+        "action": "call_tool",
+        "detail": "Calling search_similar_tickets",
+        "tool_name": "search_similar_tickets",
+        "tool_input": {
+          "description": "duplicate credit card charge for Potens subscription",
+          "top_k": 3
+        },
+        "tool_output": null
+      },
+      {
+        "step": 4,
+        "action": "observe",
+        "detail": "search_similar_tickets returned status=ok",
+        "tool_name": "search_similar_tickets",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "tickets": [
+            {
+              "id": "TKT-1002",
+              "description": "We were charged twice for our March Potens subscription. The duplicate charge appeared on our credit card statement. We need a refund for the extra charge of $499.99.",
+              "category": "billing",
+              "priority": "P1",
+              "resolution": "Confirmed duplicate charge in Stripe dashboard caused by a webhook retry during a deployment window. Issued a full refund of $499.99 and added a $50 credit as goodwill.",
+              "similarity_score": 0.592
+            },
+            {
+              "id": "TKT-1010",
+              "description": "My credit card on file expired and now I can't update it because the Potens billing page shows a blank screen. I don't want my account to get downgraded.",
+              "category": "billing",
+              "priority": "P1",
+              "resolution": "The blank billing page was caused by an expired Stripe.js session token. Cleared the customer's session cache and walked them through updating their card. Confirmed the new card was charged successfully.",
+              "similarity_score": 0.199
+            }
+          ]
+        }
+      },
+      {
+        "step": 5,
+        "action": "call_tool",
+        "detail": "Calling draft_acknowledgment",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": {
+          "category": "billing",
+          "priority": "P1",
+          "summary": "duplicate credit card charge for Potens subscription"
+        },
+        "tool_output": null
+      },
+      {
+        "step": 6,
+        "action": "observe",
+        "detail": "draft_acknowledgment returned status=ok",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "draft": "Hello,\n\nThank you for reaching out. We've received your support request regarding: duplicate credit card charge for Potens subscription\n\nWe understand the urgency and have prioritized this accordingly.\n\nYour ticket has been routed to our billing team. You can expect an initial response within 4 hours.\n\nIf you have any additional details that might help us resolve this faster, please reply to this message.\n\nBest regards,\nSupport Team",
+          "metadata": {
+            "sla_commitment": "4 hours",
+            "assigned_team": "billing team",
+            "priority_level": "P1"
+          }
+        }
+      },
+      {
+        "step": 7,
+        "action": "think",
+        "detail": "Final decision output generated.",
+        "tool_name": null,
+        "tool_input": null,
+        "tool_output": null
+      }
+    ],
+    "why": "The ticket clearly states a duplicate charge occurred for the customer's Potens subscription, which falls under billing. The lookup_policy function returned relevant policies for handling billing disputes, including a specific policy for duplicate charges. The search_similar_tickets function found a similar past ticket where a duplicate charge was confirmed and a refund was issued, which supports the chosen category and priority. Given the customer tier is 'pro' and the amount in question is under $100, a refund can likely be auto-approved, but routing to the billing team is still necessary for them to verify and process the refund.",
+    "draft_response": null,
+    "needs_human_review": false
+  }
+}

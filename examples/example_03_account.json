@@ -1,0 +1,137 @@
+{
+  "id": "example_03_account",
+  "description": "Account access (happy path)",
+  "input": {
+    "text": "I can't log in. I keep getting 'invalid credentials' but I just reset my password 10 minutes ago.",
+    "customer_tier": "free",
+    "product_area": "auth"
+  },
+  "agent_output": {
+    "category": "account",
+    "priority": "P2",
+    "next_action": "route_to_engineering",
+    "confidence": 0.8,
+    "reasoning": [
+      {
+        "step": 1,
+        "action": "call_tool",
+        "detail": "Calling lookup_policy",
+        "tool_name": "lookup_policy",
+        "tool_input": {
+          "category": "account",
+          "issue_keywords": [
+            "login",
+            "invalid credentials",
+            "password reset"
+          ]
+        },
+        "tool_output": null
+      },
+      {
+        "step": 2,
+        "action": "observe",
+        "detail": "lookup_policy returned status=ok",
+        "tool_name": "lookup_policy",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "policies": [
+            {
+              "id": "POL-006",
+              "title": "Potens Secure Account Recovery",
+              "content": "Account lockouts due to failed login attempts can be self-resolved via email-based password reset. If the customer no longer has access to their registered email, identity verification is required (government ID or last 4 of payment method). Support agents are not authorized to bypass 2FA without identity verification.",
+              "escalation_rule": "Escalate to security team if the customer reports unauthorized access or suspects account compromise.",
+              "sla_hours": 2
+            }
+          ]
+        }
+      },
+      {
+        "step": 3,
+        "action": "call_tool",
+        "detail": "Calling search_similar_tickets",
+        "tool_name": "search_similar_tickets",
+        "tool_input": {
+          "description": "Can't log in, getting 'invalid credentials' after password reset",
+          "top_k": 3
+        },
+        "tool_output": null
+      },
+      {
+        "step": 4,
+        "action": "observe",
+        "detail": "search_similar_tickets returned status=ok",
+        "tool_name": "search_similar_tickets",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "tickets": [
+            {
+              "id": "TKT-1001",
+              "description": "Customer cannot log in to the Potens admin dashboard after resetting their password. They are getting an 'invalid credentials' error even with the new password. Tried clearing cookies and using incogn",
+              "category": "account",
+              "priority": "P1",
+              "resolution": "The password reset token had expired due to a caching issue in the auth service. Invalidated all sessions and forced a fresh password reset. Customer regained access within 20 minutes.",
+              "similarity_score": 0.5
+            },
+            {
+              "id": "TKT-1011",
+              "description": "We need an audit log feature that tracks who made what changes and when in Potens. This is a requirement for our SOC 2 compliance. Without this, we may not be able to renew our contract.",
+              "category": "feature_request",
+              "priority": "P1",
+              "resolution": "Flagged as high-priority feature request due to compliance implications and contract risk. Routed to PM for immediate review. PM confirmed audit logs are on the Q3 roadmap. Customer given early access to the beta.",
+              "similarity_score": 0.091
+            },
+            {
+              "id": "TKT-1019",
+              "description": "We're getting CORS errors when trying to embed the Potens analytics widget on our website. The error says 'Access-Control-Allow-Origin' header is missing. Our domain is app.clientsite.com.",
+              "category": "technical",
+              "priority": "P1",
+              "resolution": "The customer's domain was not in the CORS allowlist. Added app.clientsite.com to the allowed origins in the CDN configuration. CORS errors resolved after cache propagation (approximately 10 minutes).",
+              "similarity_score": 0.07
+            }
+          ]
+        }
+      },
+      {
+        "step": 5,
+        "action": "call_tool",
+        "detail": "Calling draft_acknowledgment",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": {
+          "category": "account",
+          "priority": "P2",
+          "summary": "Login issue after password reset, receiving 'invalid credentials' error"
+        },
+        "tool_output": null
+      },
+      {
+        "step": 6,
+        "action": "observe",
+        "detail": "draft_acknowledgment returned status=ok",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "draft": "Hello,\n\nThank you for reaching out. We've received your support request regarding: Login issue after password reset, receiving 'invalid credentials' error\n\nWe've received your message and will look into this for you.\n\nYour ticket has been routed to our account support team. You can expect an initial response within 1 business day.\n\nIf you have any additional details that might help us resolve this faster, please reply to this message.\n\nBest regards,\nSupport Team",
+          "metadata": {
+            "sla_commitment": "1 business day",
+            "assigned_team": "account support team",
+            "priority_level": "P2"
+          }
+        }
+      },
+      {
+        "step": 7,
+        "action": "think",
+        "detail": "Final decision output generated.",
+        "tool_name": null,
+        "tool_input": null,
+        "tool_output": null
+      }
+    ],
+    "why": "The customer is experiencing a login issue after resetting their password, which suggests a potential technical issue with the authentication system. The similar tickets suggest that this could be a caching issue or an issue with the password reset token. I have routed this to the engineering team for further investigation.",
+    "draft_response": null,
+    "needs_human_review": false
+  }
+}

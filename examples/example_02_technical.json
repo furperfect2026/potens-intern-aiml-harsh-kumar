@@ -1,0 +1,146 @@
+{
+  "id": "example_02_technical",
+  "description": "Technical bug (happy path)",
+  "input": {
+    "text": "The data export is failing with a 500 error every time I try to download the weekly report in CSV format.",
+    "customer_tier": "pro",
+    "product_area": "reporting"
+  },
+  "agent_output": {
+    "category": "technical",
+    "priority": "P1",
+    "next_action": "route_to_engineering",
+    "confidence": 0.9,
+    "reasoning": [
+      {
+        "step": 1,
+        "action": "call_tool",
+        "detail": "Calling lookup_policy",
+        "tool_name": "lookup_policy",
+        "tool_input": {
+          "category": "technical",
+          "issue_keywords": [
+            "data export",
+            "500 error",
+            "weekly report",
+            "CSV format"
+          ]
+        },
+        "tool_output": null
+      },
+      {
+        "step": 2,
+        "action": "observe",
+        "detail": "lookup_policy returned status=ok",
+        "tool_name": "lookup_policy",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "policies": [
+            {
+              "id": "POL-015",
+              "title": "Potens SLA: Enterprise Performance Degradation",
+              "content": "Any ticket reporting slow performance on a Potens Enterprise account (tier=enterprise) that involves the reporting module or data export pipeline is automatically considered P0, regardless of user count affected. Do not treat these as P2. Immediately page the on-call data infrastructure engineer.",
+              "escalation_rule": "Escalate to data infrastructure lead immediately. This is a strict SLA requirement.",
+              "sla_hours": 0.5
+            }
+          ]
+        }
+      },
+      {
+        "step": 3,
+        "action": "call_tool",
+        "detail": "Calling search_similar_tickets",
+        "tool_name": "search_similar_tickets",
+        "tool_input": {
+          "description": "Data export failing with 500 error when downloading weekly report in CSV format",
+          "top_k": 3
+        },
+        "tool_output": null
+      },
+      {
+        "step": 4,
+        "action": "observe",
+        "detail": "search_similar_tickets returned status=ok",
+        "tool_name": "search_similar_tickets",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "tickets": [
+            {
+              "id": "TKT-1015",
+              "description": "We need to export all our organization's data from Potens as we're migrating to a different platform. We have approximately 800GB of data across 3 years of usage. What's the process?",
+              "category": "compliance",
+              "priority": "P1",
+              "resolution": "Data export request processed per the Data Portability Policy. Due to the volume (800GB), coordinated with the infrastructure team for a staged export over 3 business days. Data delivered in JSON format via secure S3 bucket link.",
+              "similarity_score": 0.149
+            },
+            {
+              "id": "TKT-1009",
+              "description": "We noticed that exported CSV files from Potens are missing the 'created_at' timestamp column. This column was present in exports last month. We need this data for our compliance audit.",
+              "category": "technical",
+              "priority": "P1",
+              "resolution": "Bug confirmed \u2014 the column was dropped in a schema migration in v2.15.0. Rolled back the export schema change and backfilled the missing column. Customer verified the fix with a test export.",
+              "similarity_score": 0.097
+            },
+            {
+              "id": "TKT-1020",
+              "description": "I'd like to understand Potens's data retention policies. Specifically, how long do you keep user activity logs, and can we request early deletion for certain data categories? This is for an internal c",
+              "category": "compliance",
+              "priority": "P2",
+              "resolution": "Sent the customer our full data retention policy document. Key points: activity logs retained for 12 months (configurable for enterprise), early deletion available via the Data Deletion API. Offered to schedule a call with the compliance team for detailed questions.",
+              "similarity_score": 0.057
+            }
+          ]
+        }
+      },
+      {
+        "step": 5,
+        "action": "think",
+        "detail": "Based on the information provided by the `lookup_policy` and `search_similar_tickets` functions, I can see that the issue is related to a technical problem with the data export feature. The `lookup_policy` function did not return any specific policies related to the issue, but the `search_similar_tickets` function returned several similar tickets, including one that was related to a bug with the CSV export feature.\n\nGiven this information, I believe that the category of the ticket is \"technical\"",
+        "tool_name": null,
+        "tool_input": null,
+        "tool_output": null
+      },
+      {
+        "step": 6,
+        "action": "call_tool",
+        "detail": "Calling draft_acknowledgment",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": {
+          "category": "technical",
+          "priority": "P1",
+          "summary": "Data export failing with 500 error when downloading weekly report in CSV format"
+        },
+        "tool_output": null
+      },
+      {
+        "step": 7,
+        "action": "observe",
+        "detail": "draft_acknowledgment returned status=ok",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "draft": "Hello,\n\nThank you for reaching out. We've received your support request regarding: Data export failing with 500 error when downloading weekly report in CSV format\n\nWe understand the urgency and have prioritized this accordingly.\n\nYour ticket has been routed to our engineering team. You can expect an initial response within 4 hours.\n\nIf you have any additional details that might help us resolve this faster, please reply to this message.\n\nBest regards,\nSupport Team",
+          "metadata": {
+            "sla_commitment": "4 hours",
+            "assigned_team": "engineering team",
+            "priority_level": "P1"
+          }
+        }
+      },
+      {
+        "step": 8,
+        "action": "think",
+        "detail": "Final decision output generated.",
+        "tool_name": null,
+        "tool_input": null,
+        "tool_output": null
+      }
+    ],
+    "why": "The ticket clearly describes a technical issue with the data export feature, which is failing with a 500 error. The customer is trying to download a weekly report in CSV format, which suggests a specific use case that may be related to a bug or system issue. The lookup_policy function returned a relevant policy related to enterprise performance degradation, but since the customer tier is 'pro', it's not directly applicable. However, the policy suggests that issues with the reporting module or data export pipeline should be treated with high priority. The search_similar_tickets function returned several tickets related to data export and reporting issues, which further supports the technical category and high priority. The draft_acknowledgment function generated a suitable response based on the determined category and priority.",
+    "draft_response": null,
+    "needs_human_review": false
+  }
+}

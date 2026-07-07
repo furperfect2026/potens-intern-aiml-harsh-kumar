@@ -1,0 +1,79 @@
+{
+  "id": "example_09_adversarial_gibberish",
+  "description": "Gibberish / Empty input (tests graceful failure)",
+  "input": {
+    "text": "asdf jkl; qwer uiuiuiuiui",
+    "customer_tier": null,
+    "product_area": null
+  },
+  "agent_output": {
+    "category": "general",
+    "priority": "P2",
+    "next_action": "request_more_info",
+    "confidence": 0.2,
+    "reasoning": [
+      {
+        "step": 1,
+        "action": "call_tool",
+        "detail": "Calling lookup_policy",
+        "tool_name": "lookup_policy",
+        "tool_input": {
+          "category": "general",
+          "issue_keywords": [
+            "asdf",
+            "jkl",
+            "qwer",
+            "uiuiuiuiui"
+          ]
+        },
+        "tool_output": null
+      },
+      {
+        "step": 2,
+        "action": "observe",
+        "detail": "lookup_policy returned status=no_matches",
+        "tool_name": "lookup_policy",
+        "tool_input": null,
+        "tool_output": {
+          "status": "no_matches",
+          "policies": [],
+          "note": "No policies matched category='general' with keywords=['asdf', 'jkl', 'qwer', 'uiuiuiuiui']. This may indicate an unusual issue type. Consider lowering confidence."
+        }
+      },
+      {
+        "step": 3,
+        "action": "call_tool",
+        "detail": "Calling search_similar_tickets",
+        "tool_name": "search_similar_tickets",
+        "tool_input": {
+          "description": "asdf jkl; qwer uiuiuiuiui",
+          "top_k": 3
+        },
+        "tool_output": null
+      },
+      {
+        "step": 4,
+        "action": "observe",
+        "detail": "search_similar_tickets returned status=no_matches",
+        "tool_name": "search_similar_tickets",
+        "tool_input": null,
+        "tool_output": {
+          "status": "no_matches",
+          "tickets": [],
+          "note": "No similar past tickets found above the similarity threshold. This may be a novel issue type. Consider lowering confidence."
+        }
+      },
+      {
+        "step": 5,
+        "action": "think",
+        "detail": "Final decision output generated.",
+        "tool_name": null,
+        "tool_input": null,
+        "tool_output": null
+      }
+    ],
+    "why": "The ticket is extremely vague and does not contain any meaningful information. The lookup_policy and search_similar_tickets functions both returned 'no_matches', which further lowers confidence. As a result, it's necessary to request more information from the customer to determine the issue and provide a proper response.",
+    "draft_response": null,
+    "needs_human_review": true
+  }
+}

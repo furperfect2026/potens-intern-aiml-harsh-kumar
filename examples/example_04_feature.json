@@ -1,0 +1,129 @@
+{
+  "id": "example_04_feature",
+  "description": "Feature request (low priority)",
+  "input": {
+    "text": "It would be great if the Potens dashboard had a dark mode. Working at night is blinding.",
+    "customer_tier": "pro",
+    "product_area": "ui"
+  },
+  "agent_output": {
+    "category": "feature_request",
+    "priority": "P2",
+    "next_action": "auto_resolve",
+    "confidence": 0.8,
+    "reasoning": [
+      {
+        "step": 1,
+        "action": "call_tool",
+        "detail": "Calling lookup_policy",
+        "tool_name": "lookup_policy",
+        "tool_input": {
+          "category": "feature_request",
+          "issue_keywords": [
+            "dark mode",
+            "ui"
+          ]
+        },
+        "tool_output": null
+      },
+      {
+        "step": 2,
+        "action": "observe",
+        "detail": "lookup_policy returned status=no_matches",
+        "tool_name": "lookup_policy",
+        "tool_input": null,
+        "tool_output": {
+          "status": "no_matches",
+          "policies": [],
+          "note": "No policies matched category='feature_request' with keywords=['dark mode', 'ui']. This may indicate an unusual issue type. Consider lowering confidence."
+        }
+      },
+      {
+        "step": 3,
+        "action": "call_tool",
+        "detail": "Calling search_similar_tickets",
+        "tool_name": "search_similar_tickets",
+        "tool_input": {
+          "description": "dark mode request for Potens dashboard",
+          "top_k": 3
+        },
+        "tool_output": null
+      },
+      {
+        "step": 4,
+        "action": "observe",
+        "detail": "search_similar_tickets returned status=ok",
+        "tool_name": "search_similar_tickets",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "tickets": [
+            {
+              "id": "TKT-1004",
+              "description": "I would love to see a dark mode option in the Potens web app. The current light theme is hard on the eyes during late-night work sessions. Several people on my team have asked about this too.",
+              "category": "feature_request",
+              "priority": "P2",
+              "resolution": "Logged in product backlog as FR-2847. Shared with PM team. No timeline commitment made. Sent customer a link to the public roadmap where they can upvote.",
+              "similarity_score": 0.224
+            },
+            {
+              "id": "TKT-1001",
+              "description": "Customer cannot log in to the Potens admin dashboard after resetting their password. They are getting an 'invalid credentials' error even with the new password. Tried clearing cookies and using incogn",
+              "category": "account",
+              "priority": "P1",
+              "resolution": "The password reset token had expired due to a caching issue in the auth service. Invalidated all sessions and forced a fresh password reset. Customer regained access within 20 minutes.",
+              "similarity_score": 0.168
+            },
+            {
+              "id": "TKT-1020",
+              "description": "I'd like to understand Potens's data retention policies. Specifically, how long do you keep user activity logs, and can we request early deletion for certain data categories? This is for an internal c",
+              "category": "compliance",
+              "priority": "P2",
+              "resolution": "Sent the customer our full data retention policy document. Key points: activity logs retained for 12 months (configurable for enterprise), early deletion available via the Data Deletion API. Offered to schedule a call with the compliance team for detailed questions.",
+              "similarity_score": 0.125
+            }
+          ]
+        }
+      },
+      {
+        "step": 5,
+        "action": "call_tool",
+        "detail": "Calling draft_acknowledgment",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": {
+          "category": "feature_request",
+          "priority": "P2",
+          "summary": "request for dark mode in Potens dashboard"
+        },
+        "tool_output": null
+      },
+      {
+        "step": 6,
+        "action": "observe",
+        "detail": "draft_acknowledgment returned status=ok",
+        "tool_name": "draft_acknowledgment",
+        "tool_input": null,
+        "tool_output": {
+          "status": "ok",
+          "draft": "Hello,\n\nThank you for reaching out. We've received your support request regarding: request for dark mode in Potens dashboard\n\nWe've received your message and will look into this for you.\n\nYour ticket has been routed to our product team. You can expect an initial response within 1 business day.\n\nIf you have any additional details that might help us resolve this faster, please reply to this message.\n\nBest regards,\nSupport Team",
+          "metadata": {
+            "sla_commitment": "1 business day",
+            "assigned_team": "product team",
+            "priority_level": "P2"
+          }
+        }
+      },
+      {
+        "step": 7,
+        "action": "think",
+        "detail": "Final decision output generated.",
+        "tool_name": null,
+        "tool_input": null,
+        "tool_output": null
+      }
+    ],
+    "why": "The customer is requesting a dark mode for the Potens dashboard, which is a feature enhancement suggestion. The lookup_policy function did not return any matching policies, but the search_similar_tickets function found a similar ticket that was also a feature request. The draft_acknowledgment function generated a response that acknowledges the customer's request and routes it to the product team. Based on the customer tier being 'pro' and the product area being 'ui', I have determined the category to be 'feature_request' and the priority to be 'P2'. The next action is 'auto_resolve' as the drafted response is sufficient.",
+    "draft_response": null,
+    "needs_human_review": false
+  }
+}
