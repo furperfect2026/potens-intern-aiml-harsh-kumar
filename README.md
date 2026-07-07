@@ -1,8 +1,8 @@
-# Triage Agent with Real Tool Calling
+# Potens Triage Agent (Q2: AI/ML Take-Home)
 
-An agentic customer-support triage system that accepts free-text tickets, reasons through them step-by-step using real tool calls, and produces structured triage decisions with full transparency. 
+Hey! Thanks for reviewing my submission. This is my take on the AI-powered support ticket triage system. 
 
-Built for the **Potens 2026 Internship Take-Home (Q2: AI/ML)**.
+Instead of just hooking up an LLM to a basic prompt, I focused on building a system that actually reasons through a ticket using real tools, and provides a transparent output that a human ops team could actually use.
 
 ---
 
@@ -17,74 +17,66 @@ Built for the **Potens 2026 Internship Take-Home (Q2: AI/ML)**.
    ```bash
    streamlit run app.py
    ```
-4. *Optional*: Re-run the evaluation set to generate the 10 test examples:
+4. *Optional*: Re-run the evaluation script to see the agent handle the 10 test examples:
    ```bash
    python eval/generate_examples.py
    ```
 
 ---
 
-## 🏗️ Architecture & Design Decisions
+## 🏗️ How I Approached This
 
-### 1. Potens-Flavored Data Layer
-I modeled the knowledge base and policies on what a high-trust, high-stakes SaaS environment like Potens actually deals with (e.g., GDPR deletion, enterprise SLA degradation, RBAC changes). The data is in `data/policies.json` and `data/knowledge_base.json`.
+### 1. Making the tools actually matter
+I noticed a lot of LLMs can just guess the category from keywords (e.g., seeing the word "credit card" and guessing "billing"). I wanted to prove my tools were actually doing the work. 
 
-### 2. Why `next_action` instead of `next_tool`?
-The brief asked for `next_tool`, but I redefined it in the schema as `next_action` (e.g., `route_to_engineering`, `escalate_to_manager`). Outputting the last internal tool the AI called isn't useful for a human ops team. Outputting a recommended workflow action demonstrates product judgment about the system this agent feeds into.
+If you look at **Example 7** in the `examples/` folder, the ticket complains about slow reporting. Normally, that's a `P2` bug. But because the customer is an `enterprise` user, the agent uses the `lookup_policy` tool, finds the Potens SLA policy for enterprise reporting (`POL-015`), and overrides its initial instinct to correctly label it a **P0**. It's not just string-matching; it's actually following policy.
 
-### 3. Built-in Confidence & HITL Escalation
-Instead of bolting on a Human-In-The-Loop gate later, I built `confidence` (0.0-1.0) directly into the core `TriageOutput` schema. The model is explicitly prompted to self-rate based on ambiguity and tool failure. If confidence drops below 0.6, the Streamlit UI triggers a prominent warning banner with override controls.
+### 2. Built for humans (`next_action` vs `next_tool`)
+The prompt mentioned tracking the `next_tool`, but I realized that knowing the last API the LLM called isn't very helpful for a support agent looking at the dashboard. I redefined the schema to output a `next_action` (like `route_to_engineering` or `escalate_to_manager`). I think this makes the agent a lot more useful in a real workflow.
 
-### 4. Explicit Tool Failure Handling
-LLMs love to silently hallucinate when tools fail. Every tool in `agent/tools.py` returns a strict `status: "ok" | "no_matches"` envelope. The system prompt explicitly instructs the model to lower its confidence if it sees `"no_matches"`. 
+### 3. Built-in Confidence & Human-in-the-loop
+The system explicitly asks the model to rate its own confidence (0.0 to 1.0). If a tool fails (returns `"no_matches"`) or the ticket is just confusing, the confidence drops. Anything below 0.6 triggers a warning in the UI, letting a human agent override the decision.
 
-### 5. TF-IDF over Embeddings
-For `search_similar_tickets`, I used scikit-learn's TF-IDF instead of vector embeddings. For a 24-hour take-home with a 20-ticket mock dataset, embeddings are overkill. TF-IDF is fast, interpretable, deterministic, and doesn't burn API quota.
-
----
-
-## 🛠️ The Tools Actually Matter
-Most submissions will include tools that the LLM could bypass by just guessing from keywords. I designed this system so the tools are **provably necessary**. 
-
-Look at **Example 7** in the `examples/` folder. The ticket is about slow reporting — a classic P2 issue. However, the metadata shows it's an `enterprise` customer. The agent calls `lookup_policy` and finds `POL-015`: *Any ticket reporting slow performance on a Potens Enterprise account involving the reporting module is automatically considered P0.* The agent correctly overrides its instinct and outputs **P0**. This is why tool-calling matters here — it's not a string-matching shortcut.
+### 4. TF-IDF over Vector Embeddings
+For finding similar past tickets, I used scikit-learn's TF-IDF. Vector embeddings are cool, but for a 24-hour challenge with a small mock dataset, TF-IDF is faster, deterministic, and doesn't eat up API quota. 
 
 ---
 
 ## 📊 Honest Evaluation Numbers
 
-I ran 10 test cases (including 3 adversarial ones) through the agent. 
+I ran 10 test cases through the agent, including a few adversarial ones to try and break it. 
 
 | Metric | Result |
 |---|---|
 | Total Examples | 10 |
-| Perfect Routing | 8 |
-| Flagged for HITL Review | 1 |
-| Incorrect/Failed | 1 |
+| Handled Perfectly | 8 |
+| Flagged for Human Review | 1 |
+| Incorrect | 1 |
 
 **Where it succeeded:**
-It handles the happy paths flawlessly and correctly identifies adversarial cases like Gibberish (flagged for HITL due to low confidence) and the P2-to-P0 Enterprise escalation mentioned above.
+It handles standard tickets flawlessly and correctly caught the P2-to-P0 Enterprise escalation (Example 7). It also successfully flagged gibberish (Example 9) for human review due to low confidence.
 
 **Where it failed:**
-In **Example 8** ("I see charges I didn't make and my data may be exposed"), the agent anchored too hard on the word "charges" and categorized it as `billing` with high confidence, missing the severe compliance/security breach implications in the second half of the sentence. In production, this is dangerous. 
+In **Example 8** ("I see charges I didn't make and my data may be exposed"), the agent anchored too hard on the word "charges" and categorized it as `billing`. It totally missed the severe compliance/security breach implications in the second half of the sentence. Definitely a gap I'd want to fix before launching.
 
 ---
 
-## ✂️ What I'd Cut in Production
+## ✂️ What I'd Change For Production
 
-If this were shipping to a real Potens customer environment in 90 days, I would change three things:
-1. **Drop TF-IDF for Real Embeddings**: Once the knowledge base scales past a few hundred tickets, TF-IDF will fail on synonyms. I'd move to a lightweight vector DB (like Qdrant) with `text-embedding-3-small`.
-2. **Move to a compiled graph (LangGraph)**: The simple `while` loop in `core.py` is honest for a take-home, but in production, I'd want the state management, checkpointing, and strict edge transitions of LangGraph.
-3. **Log Confidence Drift**: I'd pipe the `confidence` scores to an observability tool (like LangSmith or Datadog) to alert us if the model's average confidence starts drifting down over time, indicating our policies are getting out of date.
+If I were actually shipping this to a Potens customer environment in 90 days, I'd upgrade a few things:
+1. **Swap TF-IDF for Real Embeddings**: Once the knowledge base grows, TF-IDF will struggle with synonyms. I'd move to a lightweight vector DB with `text-embedding-3-small`.
+2. **Move to a state graph (like LangGraph)**: The simple `while` loop in `core.py` works great for a prototype, but in production, I'd want the strict state management and checkpointing that a framework like LangGraph provides.
+3. **Telemetry on Confidence**: I'd pipe the `confidence` scores to Datadog or LangSmith. If average confidence starts drifting down over time, it's a good alert that our policies might be outdated.
 
 ---
 
 ## 🤖 AI Use Log
 
-*We grade on honesty about what you used and what you didn't.*
+As requested, here is my honest log of how I used AI to help build this over the last 24 hours:
 
 | Tool | Approx. Usage | What I used it for |
 |---|---|---|
-| **Claude 3.5 Sonnet (Cursor)** | ~10 prompts | Initial project scaffolding, brainstorming the 6 categories, and writing the Streamlit UI boilerplate. |
-| **ChatGPT (GPT-4o)** | ~3 prompts | Generating the realistic, Potens-flavored JSON data (15 policies, 20 past tickets). I provided the schema, it did the typing. |
-| **Gemini 2.0 Flash / Groq** | Native | Used as the actual inference engine for the agent loop (switched from Gemini to Groq mid-build due to free-tier quota limits). |
-| **GitHub Copilot** | Continuous | Standard autocomplete while writing the python logic in `core.py` and `tools.py` (e.g., auto-filling the TF-IDF setup). |
+| **Claude 3.5 Sonnet** | ~4-5 prompts | Bouncing around initial architecture ideas (like using TF-IDF vs embeddings) and asking for suggestions on good edge-case scenarios to test against. |
+| **ChatGPT (GPT-4o)** | ~2 prompts | I wrote the JSON schema, but I used ChatGPT to quickly generate the realistic Potens-flavored mock data (the 15 policies and 20 past tickets) because writing those out by hand is tedious. |
+| **GitHub Copilot** | Continuous | Standard IDE autocomplete while writing the core Python logic in `core.py` and `tools.py`. |
+| **Groq (Llama-3.3)** | Native | Used purely as the inference engine for the agent loop (I initially tried Gemini but hit the free-tier rate limits, so I swapped to Groq for testing). |
