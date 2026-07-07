@@ -1,23 +1,23 @@
 [
   {
     "id": "TKT-1001",
-    "description": "Customer cannot log in after resetting their password. They are getting an 'invalid credentials' error even with the new password. Tried clearing cookies and using incognito mode.",
+    "description": "Customer cannot log in to the Potens admin dashboard after resetting their password. They are getting an 'invalid credentials' error even with the new password. Tried clearing cookies and using incognito mode.",
     "category": "account",
     "priority": "P1",
-    "resolution": "The password reset token had expired due to a caching issue. Invalidated all sessions and forced a fresh password reset. Customer regained access within 20 minutes.",
+    "resolution": "The password reset token had expired due to a caching issue in the auth service. Invalidated all sessions and forced a fresh password reset. Customer regained access within 20 minutes.",
     "resolved_by": "support-tier-2"
   },
   {
     "id": "TKT-1002",
-    "description": "We were charged twice for our March subscription. The duplicate charge appeared on our credit card statement. We need a refund for the extra charge of $49.99.",
+    "description": "We were charged twice for our March Potens subscription. The duplicate charge appeared on our credit card statement. We need a refund for the extra charge of $499.99.",
     "category": "billing",
     "priority": "P1",
-    "resolution": "Confirmed duplicate charge in Stripe dashboard caused by a webhook retry during a deployment window. Issued a full refund of $49.99 and added a $10 credit as goodwill.",
+    "resolution": "Confirmed duplicate charge in Stripe dashboard caused by a webhook retry during a deployment window. Issued a full refund of $499.99 and added a $50 credit as goodwill.",
     "resolved_by": "billing-team"
   },
   {
     "id": "TKT-1003",
-    "description": "The dashboard has been loading extremely slowly for the past 2 days. Charts take 30+ seconds to render. We have 50 team members affected. This is blocking our daily standups.",
+    "description": "The Potens analytics dashboard has been loading extremely slowly for the past 2 days. Charts take 30+ seconds to render. We have 50 team members affected. This is blocking our daily standups.",
     "category": "technical",
     "priority": "P0",
     "resolution": "Root cause was an unoptimized database query introduced in v2.14.3. The query was doing a full table scan on the events table. Deployed a hotfix with proper indexing. Load times returned to <2 seconds.",
@@ -25,7 +25,7 @@
   },
   {
     "id": "TKT-1004",
-    "description": "I would love to see a dark mode option in the web app. The current light theme is hard on the eyes during late-night work sessions. Several people on my team have asked about this too.",
+    "description": "I would love to see a dark mode option in the Potens web app. The current light theme is hard on the eyes during late-night work sessions. Several people on my team have asked about this too.",
     "category": "feature_request",
     "priority": "P2",
     "resolution": "Logged in product backlog as FR-2847. Shared with PM team. No timeline commitment made. Sent customer a link to the public roadmap where they can upvote.",
@@ -33,7 +33,7 @@
   },
   {
     "id": "TKT-1005",
-    "description": "Under GDPR, I am requesting complete deletion of all my personal data from your systems. My account email is john.doe@example.com. I want confirmation once this is done.",
+    "description": "Under GDPR, I am requesting complete deletion of all my personal data from Potens systems. My account email is john.doe@example.com. I want confirmation once this is done.",
     "category": "compliance",
     "priority": "P1",
     "resolution": "Identity verified via registered email confirmation. Data deletion request forwarded to compliance team. All PII purged from primary and backup systems within 12 days. Confirmation email sent to customer.",
@@ -41,7 +41,7 @@
   },
   {
     "id": "TKT-1006",
-    "description": "Our API integration is returning 503 errors intermittently. It happens about 30% of the time. We're using the v2 REST API with the /analytics endpoint. This is affecting our production pipeline.",
+    "description": "Our Potens API integration is returning 503 errors intermittently. It happens about 30% of the time. We're using the v2 REST API with the /analytics endpoint. This is affecting our production pipeline.",
     "category": "technical",
     "priority": "P0",
     "resolution": "The /analytics endpoint was hitting a rate limit on the upstream data provider. Increased the rate limit for enterprise-tier API keys and added better error messages. Customer's pipeline stabilized within 1 hour of the fix.",
@@ -49,7 +49,7 @@
   },
   {
     "id": "TKT-1007",
-    "description": "I need to transfer admin ownership of our organization account to my colleague. I'm leaving the company next week and need to ensure continuity. My colleague's email is jane.smith@company.com.",
+    "description": "I need to transfer admin ownership of our Potens organization account to my colleague. I'm leaving the company next week and need to ensure continuity. My colleague's email is jane.smith@company.com.",
     "category": "account",
     "priority": "P1",
     "resolution": "Verified requester as current sole admin. Sent ownership transfer invitation to jane.smith@company.com. Transfer completed after new admin accepted. Old admin downgraded to member role as requested.",
@@ -57,7 +57,7 @@
   },
   {
     "id": "TKT-1008",
-    "description": "Can you provide information about your enterprise plan pricing? We have a team of 200 and are currently on the Pro plan. Also interested in SSO integration and dedicated support.",
+    "description": "Can you provide information about your Potens Enterprise plan pricing? We have a team of 200 and are currently on the Pro plan. Also interested in SSO integration and dedicated support.",
     "category": "general",
     "priority": "P2",
     "resolution": "Routed to sales team with customer details. Sales rep scheduled a demo call within 2 business days. Sent enterprise brochure and case studies in the interim.",
@@ -65,7 +65,7 @@
   },
   {
     "id": "TKT-1009",
-    "description": "We noticed that exported CSV files are missing the 'created_at' timestamp column. This column was present in exports last month. We need this data for our compliance audit.",
+    "description": "We noticed that exported CSV files from Potens are missing the 'created_at' timestamp column. This column was present in exports last month. We need this data for our compliance audit.",
     "category": "technical",
     "priority": "P1",
     "resolution": "Bug confirmed — the column was dropped in a schema migration in v2.15.0. Rolled back the export schema change and backfilled the missing column. Customer verified the fix with a test export.",
@@ -73,7 +73,7 @@
   },
   {
     "id": "TKT-1010",
-    "description": "My credit card on file expired and now I can't update it because the billing page shows a blank screen. I don't want my account to get downgraded.",
+    "description": "My credit card on file expired and now I can't update it because the Potens billing page shows a blank screen. I don't want my account to get downgraded.",
     "category": "billing",
     "priority": "P1",
     "resolution": "The blank billing page was caused by an expired Stripe.js session token. Cleared the customer's session cache and walked them through updating their card. Confirmed the new card was charged successfully.",
@@ -81,7 +81,7 @@
   },
   {
     "id": "TKT-1011",
-    "description": "We need an audit log feature that tracks who made what changes and when. This is a requirement for our SOC 2 compliance. Without this, we may not be able to renew our contract.",
+    "description": "We need an audit log feature that tracks who made what changes and when in Potens. This is a requirement for our SOC 2 compliance. Without this, we may not be able to renew our contract.",
     "category": "feature_request",
     "priority": "P1",
     "resolution": "Flagged as high-priority feature request due to compliance implications and contract risk. Routed to PM for immediate review. PM confirmed audit logs are on the Q3 roadmap. Customer given early access to the beta.",
@@ -89,7 +89,7 @@
   },
   {
     "id": "TKT-1012",
-    "description": "Hi, I just signed up and I'm a bit confused about how to set up my first project. The onboarding wizard seems to skip the team invitation step. Can someone walk me through it?",
+    "description": "Hi, I just signed up for Potens and I'm a bit confused about how to set up my first project. The onboarding wizard seems to skip the team invitation step. Can someone walk me through it?",
     "category": "general",
     "priority": "P2",
     "resolution": "Sent the customer a link to the Getting Started guide and offered a 15-minute onboarding call. During the call, identified a UI bug where the 'Invite Team' step was hidden on screens below 1024px width. Filed bug report.",
@@ -97,7 +97,7 @@
   },
   {
     "id": "TKT-1013",
-    "description": "One of our former employees still has access to our account dashboard even though we removed them 2 weeks ago. They can still see our data. This is a serious security concern.",
+    "description": "One of our former employees still has access to our Potens dashboard even though we removed them 2 weeks ago. They can still see our data. This is a serious security concern.",
     "category": "compliance",
     "priority": "P0",
     "resolution": "Investigated and found the user's session tokens were not invalidated upon removal due to a bug in the session management service. Force-invalidated all sessions for the removed user. Deployed a fix to ensure session cleanup on user removal. Notified security team.",
@@ -105,7 +105,7 @@
   },
   {
     "id": "TKT-1014",
-    "description": "The mobile app crashes immediately on launch after the latest update. I'm on iOS 18.2 with an iPhone 15 Pro. Reinstalling didn't help. I can't access any of my data.",
+    "description": "The Potens mobile app crashes immediately on launch after the latest update. I'm on iOS 18.2 with an iPhone 15 Pro. Reinstalling didn't help. I can't access any of my data.",
     "category": "technical",
     "priority": "P0",
     "resolution": "Crash was caused by a nil pointer dereference in the new offline sync module on iOS 18.2. Pushed a hotfix (v3.4.1) to the App Store within 6 hours. Customer confirmed the app launches correctly after updating.",
@@ -113,7 +113,7 @@
   },
   {
     "id": "TKT-1015",
-    "description": "We need to export all our organization's data as we're migrating to a different platform. We have approximately 800GB of data across 3 years of usage. What's the process?",
+    "description": "We need to export all our organization's data from Potens as we're migrating to a different platform. We have approximately 800GB of data across 3 years of usage. What's the process?",
     "category": "compliance",
     "priority": "P1",
     "resolution": "Data export request processed per the Data Portability Policy. Due to the volume (800GB), coordinated with the infrastructure team for a staged export over 3 business days. Data delivered in JSON format via secure S3 bucket link.",
@@ -121,7 +121,7 @@
   },
   {
     "id": "TKT-1016",
-    "description": "We accidentally deleted a project with 6 months of work. Is there any way to recover it? It was deleted about 2 hours ago by one of our team members by mistake.",
+    "description": "We accidentally deleted a project with 6 months of work in Potens. Is there any way to recover it? It was deleted about 2 hours ago by one of our team members by mistake.",
     "category": "technical",
     "priority": "P0",
     "resolution": "Soft-delete retention policy preserved the project data. Restored the project and all associated data from the soft-delete archive within 30 minutes. Recommended the customer enable the 'deletion confirmation' setting to prevent future accidents.",
@@ -129,7 +129,7 @@
   },
   {
     "id": "TKT-1017",
-    "description": "Is there a way to integrate with Slack for notifications? We'd like to get alerts in our #engineering channel when certain events happen in the dashboard.",
+    "description": "Is there a way to integrate Potens with Slack for notifications? We'd like to get alerts in our #engineering channel when certain events happen in the dashboard.",
     "category": "feature_request",
     "priority": "P2",
     "resolution": "Informed the customer about the existing webhook feature that can be used with Slack's incoming webhooks. Sent documentation link. Also logged the native Slack integration as a feature request in the backlog.",
@@ -137,7 +137,7 @@
   },
   {
     "id": "TKT-1018",
-    "description": "Our invoices are showing the wrong company name. We changed our legal entity name 3 months ago and updated it in the settings, but invoices still show the old name. We need corrected invoices for tax purposes.",
+    "description": "Our Potens invoices are showing the wrong company name. We changed our legal entity name 3 months ago and updated it in the settings, but invoices still show the old name. We need corrected invoices for tax purposes.",
     "category": "billing",
     "priority": "P1",
     "resolution": "The billing system was pulling the company name from a cached value that hadn't been refreshed. Cleared the cache, regenerated the last 3 invoices with the correct entity name, and sent them to the customer as PDFs.",
@@ -145,7 +145,7 @@
   },
   {
     "id": "TKT-1019",
-    "description": "We're getting CORS errors when trying to embed your analytics widget on our website. The error says 'Access-Control-Allow-Origin' header is missing. Our domain is app.clientsite.com.",
+    "description": "We're getting CORS errors when trying to embed the Potens analytics widget on our website. The error says 'Access-Control-Allow-Origin' header is missing. Our domain is app.clientsite.com.",
     "category": "technical",
     "priority": "P1",
     "resolution": "The customer's domain was not in the CORS allowlist. Added app.clientsite.com to the allowed origins in the CDN configuration. CORS errors resolved after cache propagation (approximately 10 minutes).",
@@ -153,7 +153,7 @@
   },
   {
     "id": "TKT-1020",
-    "description": "I'd like to understand your data retention policies. Specifically, how long do you keep user activity logs, and can we request early deletion for certain data categories? This is for an internal compliance review.",
+    "description": "I'd like to understand Potens's data retention policies. Specifically, how long do you keep user activity logs, and can we request early deletion for certain data categories? This is for an internal compliance review.",
     "category": "compliance",
     "priority": "P2",
     "resolution": "Sent the customer our full data retention policy document. Key points: activity logs retained for 12 months (configurable for enterprise), early deletion available via the Data Deletion API. Offered to schedule a call with the compliance team for detailed questions.",
