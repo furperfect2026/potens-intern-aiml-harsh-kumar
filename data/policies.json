@@ -1,0 +1,122 @@
+[
+  {
+    "id": "POL-001",
+    "category": "billing",
+    "title": "Billing Dispute Resolution Policy",
+    "content": "All billing disputes must be acknowledged within 4 business hours. Refund requests under $100 can be auto-approved. Refund requests over $100 require manager approval. Enterprise customers receive priority handling with a 2-hour SLA.",
+    "escalation_rule": "Escalate to billing team lead if the disputed amount exceeds $500 or involves recurring charges.",
+    "sla_hours": 4
+  },
+  {
+    "id": "POL-002",
+    "category": "billing",
+    "title": "Subscription Cancellation Policy",
+    "content": "Subscription cancellations take effect at the end of the current billing cycle. Pro-rated refunds are available for annual plans within the first 30 days. Customers on enterprise plans must route cancellation through their account manager.",
+    "escalation_rule": "Route to account manager for enterprise-tier cancellations.",
+    "sla_hours": 8
+  },
+  {
+    "id": "POL-003",
+    "category": "technical",
+    "title": "Critical System Outage SLA",
+    "content": "P0 technical issues (full system outage, data loss risk) must be acknowledged within 15 minutes. Engineering on-call must be paged immediately. Customer communication must go out within 30 minutes with an ETA for resolution.",
+    "escalation_rule": "Auto-escalate to engineering lead if unresolved after 1 hour. Notify VP of Engineering if unresolved after 4 hours.",
+    "sla_hours": 0.25
+  },
+  {
+    "id": "POL-004",
+    "category": "technical",
+    "title": "Bug Report Handling Policy",
+    "content": "Non-critical bugs (P1/P2) should be triaged within 24 hours. Reproducible bugs with steps provided should be routed directly to the relevant engineering squad. Workarounds should be communicated to the customer if available.",
+    "escalation_rule": "Escalate to engineering manager if a P1 bug affects more than 10% of active users.",
+    "sla_hours": 24
+  },
+  {
+    "id": "POL-005",
+    "category": "technical",
+    "title": "API Downtime Communication Policy",
+    "content": "Any API downtime exceeding 5 minutes must be posted to the public status page. Affected customers with webhook integrations must receive a direct notification. Post-incident review is mandatory within 48 hours.",
+    "escalation_rule": "Notify infrastructure team immediately. Escalate to CTO if downtime exceeds 30 minutes.",
+    "sla_hours": 0.08
+  },
+  {
+    "id": "POL-006",
+    "category": "account",
+    "title": "Account Lockout Recovery Policy",
+    "content": "Account lockouts due to failed login attempts can be self-resolved via email-based password reset. If the customer no longer has access to their registered email, identity verification is required (government ID or last 4 of payment method). Support agents are not authorized to bypass 2FA without identity verification.",
+    "escalation_rule": "Escalate to security team if the customer reports unauthorized access or suspects account compromise.",
+    "sla_hours": 2
+  },
+  {
+    "id": "POL-007",
+    "category": "account",
+    "title": "Permission and Role Change Policy",
+    "content": "Role changes (admin, editor, viewer) must be requested by an existing admin on the account. Support agents can process role changes for verified admins. Downgrading an admin to a lower role requires confirmation from at least one other admin on the account.",
+    "escalation_rule": "Escalate to account manager if the requesting user is the sole admin and wants to transfer ownership.",
+    "sla_hours": 4
+  },
+  {
+    "id": "POL-008",
+    "category": "feature_request",
+    "title": "Feature Request Intake Policy",
+    "content": "All feature requests should be logged in the product backlog with the customer's use case and business impact. Requests from enterprise customers should be flagged for PM review within 1 week. Do not make commitments about timelines or likelihood of implementation.",
+    "escalation_rule": "Route to product manager if the request comes from a customer contributing >5% of ARR.",
+    "sla_hours": 48
+  },
+  {
+    "id": "POL-009",
+    "category": "compliance",
+    "title": "GDPR Data Deletion Request Policy",
+    "content": "Data deletion requests under GDPR Article 17 must be acknowledged within 24 hours and completed within 30 days. The customer must verify their identity before deletion proceeds. All associated data across primary and backup systems must be purged. A confirmation email must be sent upon completion.",
+    "escalation_rule": "Route to legal/compliance team immediately. Do not process deletion without compliance team sign-off.",
+    "sla_hours": 24
+  },
+  {
+    "id": "POL-010",
+    "category": "compliance",
+    "title": "Data Export and Portability Policy",
+    "content": "Customers have the right to export their data in a machine-readable format (JSON or CSV). Export requests should be processed within 5 business days. For accounts with more than 1TB of data, coordinate with the infrastructure team for a staged export.",
+    "escalation_rule": "Escalate to infrastructure team for exports exceeding 1TB. Notify compliance officer for any export involving PII of third parties.",
+    "sla_hours": 120
+  },
+  {
+    "id": "POL-011",
+    "category": "compliance",
+    "title": "Security Incident Reporting Policy",
+    "content": "Any suspected data breach or unauthorized access must be reported to the security team within 1 hour of detection. Customer notification must occur within 72 hours as per GDPR requirements. All communication must be reviewed by legal before sending. Preserve all logs and evidence — do not modify or delete anything.",
+    "escalation_rule": "Immediate escalation to CISO and legal counsel. If customer data is confirmed compromised, notify the CEO within 2 hours.",
+    "sla_hours": 1
+  },
+  {
+    "id": "POL-012",
+    "category": "general",
+    "title": "General Inquiry Response Policy",
+    "content": "General inquiries (product information, onboarding assistance, partnership questions) should be responded to within 1 business day. Route sales-related inquiries to the sales team. Route partnership inquiries to business development.",
+    "escalation_rule": "No escalation required unless the inquiry involves a potential enterprise deal (>$50K ARR).",
+    "sla_hours": 24
+  },
+  {
+    "id": "POL-013",
+    "category": "billing",
+    "title": "Failed Payment Retry Policy",
+    "content": "Failed payments are retried automatically at 1, 3, and 7 days after the initial failure. After 3 failed retries, the account is downgraded to a free tier. Customers are notified via email at each retry. Grace period of 14 days applies before any data is archived.",
+    "escalation_rule": "Route to billing team if the customer contacts support about a failed payment before the retry cycle completes.",
+    "sla_hours": 8
+  },
+  {
+    "id": "POL-014",
+    "category": "account",
+    "title": "Account Deactivation and Reactivation Policy",
+    "content": "Deactivated accounts retain data for 90 days. Reactivation within the 90-day window restores all data and settings. After 90 days, data is permanently deleted per our retention policy. Enterprise accounts have a 180-day retention window.",
+    "escalation_rule": "Escalate to account manager if an enterprise customer requests reactivation after the retention window.",
+    "sla_hours": 12
+  },
+  {
+    "id": "POL-015",
+    "category": "technical",
+    "title": "Performance Degradation Response Policy",
+    "content": "Reports of slow performance or degraded service quality should be validated against internal monitoring dashboards. If confirmed, route to the infrastructure team. If not reproducible, gather browser/device details and escalate to QA. Communicate expected resolution timeline to the customer.",
+    "escalation_rule": "Escalate to infrastructure lead if degradation affects >20% of requests or is confirmed across multiple regions.",
+    "sla_hours": 4
+  }
+]
