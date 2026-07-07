@@ -1,17 +1,12 @@
 """
-Core agent loop using Gemini 2.0 Flash with native function calling.
+Core agent loop using Groq with native function calling.
 
 The loop:
-1. Send ticket + system prompt to Gemini with tool declarations
+1. Send ticket + system prompt to Groq with tool declarations
 2. If model returns tool calls → execute them via TOOL_REGISTRY, feed results back
 3. Repeat until model produces a final text response (no more tool calls)
 4. Parse the structured triage output from the response
 5. Check confidence → flag for human review if < 0.6
-
-Design decision: Using google-genai SDK (not the older google-generativeai)
-for cleaner function calling support. The agent loop is intentionally simple —
-no framework (LangChain, CrewAI) because the assignment tests whether we can
-wire LLM components ourselves, not whether we can install a framework.
 """
 
 import json
@@ -20,8 +15,7 @@ import re
 from typing import Optional
 
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from groq import Groq
 
 from agent.models import TicketInput, TriageOutput, ReasoningStep
 from agent.prompts import TRIAGE_SYSTEM_PROMPT, TOOL_DECLARATIONS
@@ -30,18 +24,19 @@ from agent.tools import TOOL_REGISTRY
 load_dotenv()
 
 
-def _build_tools() -> list[types.Tool]:
-    """Convert our tool declarations into Gemini Tool objects."""
-    function_declarations = []
+def _build_tools() -> list[dict]:
+    """Convert our tool declarations into Groq/OpenAI JSON schema Tool objects."""
+    tools = []
     for decl in TOOL_DECLARATIONS:
-        function_declarations.append(
-            types.FunctionDeclaration(
-                name=decl["name"],
-                description=decl["description"],
-                parameters=decl["parameters"]
-            )
-        )
-    return [types.Tool(function_declarations=function_declarations)]
+        tools.append({
+            "type": "function",
+            "function": {
+                "name": decl["name"],
+                "description": decl["description"],
+                "parameters": decl["parameters"]
+            }
+        })
+    return tools
 
 
 def _parse_triage_output(text: str, reasoning_trace: list[ReasoningStep]) -> TriageOutput:
@@ -79,29 +74,6 @@ def _parse_triage_output(text: str, reasoning_trace: list[ReasoningStep]) -> Tri
     return output
 
 
-def _execute_tool_call(function_call) -> dict:
-    """Execute a tool call and return the result. Handles unknown tools gracefully."""
-    tool_name = function_call.name
-    tool_args = dict(function_call.args) if function_call.args else {}
-
-    if tool_name not in TOOL_REGISTRY:
-        return {
-            "status": "error",
-            "message": f"Unknown tool: {tool_name}. Available tools: {list(TOOL_REGISTRY.keys())}"
-        }
-
-    tool_fn = TOOL_REGISTRY[tool_name]
-
-    try:
-        result = tool_fn(**tool_args)
-        return result
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Tool '{tool_name}' failed with error: {str(e)}"
-        }
-
-
 def run_triage(ticket: TicketInput) -> TriageOutput:
     """
     Main entry point. Takes a ticket, runs the agent loop, returns a triage decision.
@@ -109,7 +81,7 @@ def run_triage(ticket: TicketInput) -> TriageOutput:
     The loop continues until the model stops requesting tool calls
     (max 10 iterations as a safety limit to prevent infinite loops).
     """
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
     # Build the initial user message with ticket details
     user_message = f"Triage this support ticket:\n\n{ticket.text}"
@@ -122,99 +94,94 @@ def run_triage(ticket: TicketInput) -> TriageOutput:
     reasoning_trace: list[ReasoningStep] = []
     step_counter = 0
 
-    # Initial request
-    contents = [types.Content(role="user", parts=[types.Part.from_text(text=user_message)])]
+    messages = [
+        {"role": "system", "content": TRIAGE_SYSTEM_PROMPT},
+        {"role": "user", "content": user_message}
+    ]
 
     MAX_ITERATIONS = 10
 
     for iteration in range(MAX_ITERATIONS):
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=TRIAGE_SYSTEM_PROMPT,
-                tools=tools,
-                temperature=0.2,  # low temperature for consistent triage decisions
-            )
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            tools=tools,
+            temperature=0.2,
+            tool_choice="auto"
         )
 
-        candidate = response.candidates[0]
-        parts = candidate.content.parts
-
+        message = response.choices[0].message
+        
         # Check if the model wants to call tools
-        tool_call_parts = [p for p in parts if p.function_call]
-        text_parts = [p for p in parts if p.text]
-
-        if not tool_call_parts:
+        if not message.tool_calls:
             # No tool calls — model is done reasoning, parse final output
-            final_text = "".join(p.text for p in text_parts)
-
-            # Log the final thinking step
+            final_text = message.content or ""
+            
             step_counter += 1
             reasoning_trace.append(ReasoningStep(
                 step=step_counter,
                 action="think",
-                detail=f"Final decision: {final_text[:300]}"
+                detail=f"Final decision output generated."
             ))
-
-            # Add assistant response to contents for completeness
-            contents.append(candidate.content)
-
+            
             return _parse_triage_output(final_text, reasoning_trace)
-
-        # Process each tool call
-        # First, add the assistant's response (with tool calls) to contents
-        contents.append(candidate.content)
-
-        # Log any thinking text that came with the tool calls
-        if text_parts:
+            
+        # Add assistant's response to messages history
+        messages.append(message)
+        
+        # Log any thinking text that came alongside the tool call
+        if message.content:
             step_counter += 1
-            thinking_text = "".join(p.text for p in text_parts)
             reasoning_trace.append(ReasoningStep(
                 step=step_counter,
                 action="think",
-                detail=thinking_text[:500]
+                detail=message.content[:500]
             ))
-
-        # Execute each tool call and collect results
-        function_response_parts = []
-        for part in tool_call_parts:
-            fc = part.function_call
+            
+        # Process each tool call
+        for tool_call in message.tool_calls:
             step_counter += 1
-
-            # Log the tool call
-            tool_args = dict(fc.args) if fc.args else {}
+            
+            tool_name = tool_call.function.name
+            tool_args_str = tool_call.function.arguments
+            try:
+                tool_args = json.loads(tool_args_str)
+            except json.JSONDecodeError:
+                tool_args = {}
+                
             reasoning_trace.append(ReasoningStep(
                 step=step_counter,
                 action="call_tool",
-                detail=f"Calling {fc.name}",
-                tool_name=fc.name,
+                detail=f"Calling {tool_name}",
+                tool_name=tool_name,
                 tool_input=tool_args
             ))
-
-            # Execute
-            result = _execute_tool_call(fc)
-
-            # Log the observation
+            
+            # Execute tool
+            if tool_name not in TOOL_REGISTRY:
+                result = {"status": "error", "message": f"Unknown tool: {tool_name}"}
+            else:
+                try:
+                    result = TOOL_REGISTRY[tool_name](**tool_args)
+                except Exception as e:
+                    result = {"status": "error", "message": str(e)}
+                    
             step_counter += 1
             reasoning_trace.append(ReasoningStep(
                 step=step_counter,
                 action="observe",
-                detail=f"{fc.name} returned status={result.get('status', 'unknown')}",
-                tool_name=fc.name,
+                detail=f"{tool_name} returned status={result.get('status', 'unknown')}",
+                tool_name=tool_name,
                 tool_output=result
             ))
-
-            # Build the function response part
-            function_response_parts.append(
-                types.Part.from_function_response(
-                    name=fc.name,
-                    response=result
-                )
-            )
-
-        # Add tool results back to the conversation
-        contents.append(types.Content(role="user", parts=function_response_parts))
+            
+            # Feed result back into conversation
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "name": tool_name,
+                "content": json.dumps(result)
+            })
 
     # Safety: if we hit max iterations, return a low-confidence fallback
     return TriageOutput(
@@ -227,3 +194,4 @@ def run_triage(ticket: TicketInput) -> TriageOutput:
             "Escalating to manager for manual review.",
         needs_human_review=True
     )
+
